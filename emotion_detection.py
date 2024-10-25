@@ -5,8 +5,31 @@ HEADERS = {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_sto
 def json_template(text:str):
     return {"raw_document": {"text": text}}
 
+def find_dominant_emotion(emotions:dict):
+    ''' Finds the emotion with the highest score in `emotions` and returns its name
+    '''
+    max_emotion = ""
+    max_val = -1
+    for key in emotions.keys():
+        if emotions[key] > max_val:
+            max_emotion = key
+            max_val = emotions[key]
+    return max_emotion
+
 def emotion_detector(text_to_analyze:str):
     ''' Runs the Watson NLP Emotion Predict function on `text_to_analyze`
     '''
     response = requests.post(URL, headers=HEADERS, json=json_template(text_to_analyze))
-    return response.text
+    formatted_response = json.loads(response.text)
+
+    response_dict = {
+        'anger': formatted_response['emotionPredictions'][0]['emotion']['anger'],
+        'disgust': formatted_response['emotionPredictions'][0]['emotion']['disgust'],
+        'fear': formatted_response['emotionPredictions'][0]['emotion']['fear'],
+        'joy': formatted_response['emotionPredictions'][0]['emotion']['joy'],
+        'sadness': formatted_response['emotionPredictions'][0]['emotion']['sadness']
+    }
+
+    response_dict['dominant_emotion'] = find_dominant_emotion(response_dict)
+    
+    return response_dict
