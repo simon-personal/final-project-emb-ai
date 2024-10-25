@@ -22,14 +22,26 @@ def emotion_detector(text_to_analyze:str):
     response = requests.post(URL, headers=HEADERS, json=json_template(text_to_analyze))
     formatted_response = json.loads(response.text)
 
-    response_dict = {
-        'anger': formatted_response['emotionPredictions'][0]['emotion']['anger'],
-        'disgust': formatted_response['emotionPredictions'][0]['emotion']['disgust'],
-        'fear': formatted_response['emotionPredictions'][0]['emotion']['fear'],
-        'joy': formatted_response['emotionPredictions'][0]['emotion']['joy'],
-        'sadness': formatted_response['emotionPredictions'][0]['emotion']['sadness']
-    }
+    if response.status_code == 200:
+        response_dict = {
+            'anger': formatted_response['emotionPredictions'][0]['emotion']['anger'],
+            'disgust': formatted_response['emotionPredictions'][0]['emotion']['disgust'],
+            'fear': formatted_response['emotionPredictions'][0]['emotion']['fear'],
+            'joy': formatted_response['emotionPredictions'][0]['emotion']['joy'],
+            'sadness': formatted_response['emotionPredictions'][0]['emotion']['sadness']
+        }
 
-    response_dict['dominant_emotion'] = find_dominant_emotion(response_dict)
+        response_dict['dominant_emotion'] = find_dominant_emotion(response_dict)
+
+    elif response.status_code == 400:
+        response_dict = {
+            'anger': None,
+            'disgust': None,
+            'fear': None,
+            'joy': None,
+            'sadness': None
+        }
+
+        response_dict['dominant_emotion'] = None
     
     return response_dict
